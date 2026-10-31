@@ -5,7 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from ingest.openalex.normalize import abstract_from_inverted_index, clean_text, normalize
+from ingest.openalex.normalize import (
+    abstract_from_inverted_index,
+    clean_abstract,
+    clean_text,
+    normalize,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -117,3 +122,10 @@ def test_abstract_from_inverted_index():
 def test_clean_text():
     assert clean_text("  Mass of <i>Bos taurus</i> &amp; cows\n") == "Mass of Bos taurus & cows"
     assert clean_text("Қазақстандағы ғылым") == "Қазақстандағы ғылым"
+
+
+def test_clean_abstract_strips_label():
+    assert clean_abstract("Abstract Extreme weather events") == "Extreme weather events"
+    assert clean_abstract("Аннотация. Работа посвящена") == "Работа посвящена"
+    assert clean_abstract("Abstracts of talks are listed") == "Abstracts of talks are listed"
+    assert clean_abstract("Abstract") == "Abstract"

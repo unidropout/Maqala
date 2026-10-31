@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Токены темы. Пока черновые: полноценная дизайн-система — на этапе 4. */
+:root {
+  --bg: 250 248 243;
+  --surface: 255 255 255;
+  --fg: 24 24 27;
+  --muted: 92 92 102;
+  --line: 226 222 212;
+  --accent: 0 120 150;
+  --gold: 214 158 0;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: 15 17 20;
+    --surface: 24 27 32;
+    --fg: 236 236 238;
+    --muted: 160 163 172;
+    --line: 45 49 56;
+    --accent: 64 196 222;
+    --gold: 250 196 50;
+    color-scheme: dark;
+  }
+}
+
+body {
+  @apply bg-bg text-fg antialiased;
+}
+
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-accent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

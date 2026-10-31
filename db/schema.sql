@@ -48,6 +48,19 @@ create index if not exists works_doi_idx on works (doi) where doi is not null;
 -- Фильтр «страна» и страница страны (FR-2, FR-6).
 create index if not exists works_countries_idx on works using gin (countries);
 
+-- Полнотекстовый поиск (FR-1): название весит больше аннотации.
+-- Конфигурация simple одинаково работает для русского, казахского и английского,
+-- но не учитывает морфологию (решение 007 в docs/decisions.md).
+alter table works add column if not exists search_vector tsvector generated always as (
+    setweight(to_tsvector('simple', coalesce(title, '')), 'A') ||
+    setweight(to_tsvector('simple', coalesce(abstract, '')), 'B')
+) stored;
+create index if not exists works_search_idx on works using gin (search_vector);
+-- Фильтры и сортировки выдачи (FR-2, FR-3).
+create index if not exists works_year_idx on works (publication_year);
+create index if not exists works_cited_idx on works (cited_by_count desc);
+create index if not exists works_date_idx on works (publication_date desc nulls last);
+
 -- Лог каждого запуска коннектора.
 create table if not exists ingest_runs (
     id            bigint generated always as identity primary key,

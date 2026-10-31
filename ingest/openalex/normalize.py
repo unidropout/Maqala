@@ -9,6 +9,10 @@ SOURCE = "openalex"
 
 _TAG_RE = re.compile(r"<[^>]+>")
 _SPACE_RE = re.compile(r"\s+")
+# Издатели часто начинают аннотацию со служебного заголовка: «Abstract ...», «Аннотация. ...».
+_ABSTRACT_LABEL_RE = re.compile(
+    r"^(abstract|summary|аннотация|андатпа)\s*[:.\-—]?\s+", re.IGNORECASE
+)
 
 # Поля, которые не кладём в raw: аннотация уже лежит текстом, а индекс занимает больше всего места.
 _RAW_EXCLUDE = {"abstract_inverted_index"}
@@ -31,7 +35,9 @@ def normalize(record: dict[str, Any]) -> dict[str, Any] | None:
         "source_id": strip_prefix(record["id"], "https://openalex.org/"),
         "doi": doi.lower() if doi else None,
         "title": title,
-        "abstract": clean_text(abstract_from_inverted_index(record.get("abstract_inverted_index"))),
+        "abstract": clean_abstract(
+            abstract_from_inverted_index(record.get("abstract_inverted_index"))
+        ),
         "publication_year": record.get("publication_year"),
         "publication_date": parse_date(record.get("publication_date")),
         "language": record.get("language") or None,
@@ -94,6 +100,13 @@ def authors(authorships: list[dict[str, Any]]) -> list[dict[str, Any]]:
             }
         )
     return result
+
+
+def clean_abstract(value: str | None) -> str | None:
+    text = clean_text(value)
+    if not text:
+        return None
+    return _ABSTRACT_LABEL_RE.sub("", text, count=1) or None
 
 
 def clean_text(value: str | None) -> str | None:
