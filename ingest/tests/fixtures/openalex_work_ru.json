@@ -1,0 +1,441 @@
+{
+  "id": "https://openalex.org/W2788331458",
+  "doi": "https://doi.org/10.23670/irj.2017.66.109",
+  "display_name": "ПОВЫШЕНИЕ ЭКОЛОГО-МЕЛИОРАТИВНОЙ УСТОЙЧИВОСТИ ОРОШАЕМЫХ ЗЕМЕЛЬ ЮГА КАЗАХСТАНА",
+  "publication_year": 2017,
+  "publication_date": "2017-12-18",
+  "language": "ru",
+  "type": "article",
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "green",
+    "oa_url": "https://doi.org/10.23670/irj.2017.66.109",
+    "any_repository_has_fulltext": true
+  },
+  "best_oa_location": {
+    "id": "doi:10.23670/irj.2017.66.109",
+    "doi": "https://doi.org/10.23670/irj.2017.66.109",
+    "is_oa": true,
+    "landing_page_url": "https://doi.org/10.23670/irj.2017.66.109",
+    "pdf_url": null,
+    "source": {
+      "id": "https://openalex.org/S7407052515",
+      "display_name": "Russian Agency for Digital Standardization",
+      "issn_l": null,
+      "issn": null,
+      "is_oa": false,
+      "is_in_doaj": false,
+      "is_core": false,
+      "listed_in": [],
+      "host_organization": null,
+      "host_organization_name": null,
+      "host_organization_lineage": [],
+      "host_organization_lineage_names": [],
+      "type": "repository"
+    },
+    "license": null,
+    "license_id": null,
+    "version": null,
+    "is_accepted": false,
+    "is_published": false,
+    "raw_source_name": null,
+    "raw_type": "article-journal"
+  },
+  "primary_location": {
+    "id": "doi:10.23670/irj.2017.66.109",
+    "doi": "https://doi.org/10.23670/irj.2017.66.109",
+    "is_oa": true,
+    "landing_page_url": "https://doi.org/10.23670/irj.2017.66.109",
+    "pdf_url": null,
+    "source": {
+      "id": "https://openalex.org/S7407052515",
+      "display_name": "Russian Agency for Digital Standardization",
+      "issn_l": null,
+      "issn": null,
+      "is_oa": false,
+      "is_in_doaj": false,
+      "is_core": false,
+      "listed_in": [],
+      "host_organization": null,
+      "host_organization_name": null,
+      "host_organization_lineage": [],
+      "host_organization_lineage_names": [],
+      "type": "repository"
+    },
+    "license": null,
+    "license_id": null,
+    "version": null,
+    "is_accepted": false,
+    "is_published": false,
+    "raw_source_name": null,
+    "raw_type": "article-journal"
+  },
+  "primary_topic": {
+    "id": "https://openalex.org/T12710",
+    "display_name": "Engineering and Agricultural Innovations",
+    "score": 0.8432999849319458,
+    "subfield": {
+      "id": "https://openalex.org/subfields/1104",
+      "display_name": "Aquatic Science"
+    },
+    "field": {
+      "id": "https://openalex.org/fields/11",
+      "display_name": "Agricultural and Biological Sciences"
+    },
+    "domain": {
+      "id": "https://openalex.org/domains/1",
+      "display_name": "Life Sciences"
+    }
+  },
+  "cited_by_count": 21,
+  "authorships": [
+    {
+      "author_position": "first",
+      "author": {
+        "id": "https://openalex.org/A5030682715",
+        "display_name": "Л В Кирейчева",
+        "orcid": null,
+        "observed_orcids": []
+      },
+      "institutions": [
+        {
+          "id": "https://openalex.org/I4210107576",
+          "display_name": "All-Russian Scientific Research Institute of Hydraulic Engineering and Melioration named after A.N. Kostyakov",
+          "ror": "https://ror.org/01e8kye07",
+          "country_code": "RU",
+          "type": "facility",
+          "lineage": [
+            "https://openalex.org/I4210107576"
+          ]
+        }
+      ],
+      "countries": [
+        "RU"
+      ],
+      "is_corresponding": false,
+      "raw_author_name": "Кирейчева, Л.В.",
+      "raw_affiliation_strings": [
+        "Всероссийский научно-исследовательский институт гидротехники и мелиорации имени А.Н.Костякова"
+      ],
+      "raw_orcid": "https://orcid.org/0000-0002-7114-2706",
+      "affiliations": [
+        {
+          "raw_affiliation_string": "Всероссийский научно-исследовательский институт гидротехники и мелиорации имени А.Н.Костякова",
+          "institution_ids": [
+            "https://openalex.org/I4210107576"
+          ]
+        }
+      ]
+    },
+    {
+      "author_position": "middle",
+      "author": {
+        "id": "https://openalex.org/A5068399452",
+        "display_name": "Н Н Балгабаев",
+        "orcid": null,
+        "observed_orcids": []
+      },
+      "institutions": [],
+      "countries": [],
+      "is_corresponding": false,
+      "raw_author_name": "Балгабаев, Н.Н.",
+      "raw_affiliation_strings": [
+        "Казахский научно-исследовательский институт водного хозяйства"
+      ],
+      "raw_orcid": null,
+      "affiliations": [
+        {
+          "raw_affiliation_string": "Казахский научно-исследовательский институт водного хозяйства",
+          "institution_ids": []
+        }
+      ]
+    },
+    {
+      "author_position": "last",
+      "author": {
+        "id": "https://openalex.org/A5089945888",
+        "display_name": "С З Жигитова",
+        "orcid": null,
+        "observed_orcids": []
+      },
+      "institutions": [
+        {
+          "id": "https://openalex.org/I4210101819",
+          "display_name": "M. Kh Dulati Taraz State University",
+          "ror": "https://ror.org/014kyp779",
+          "country_code": "KZ",
+          "type": "education",
+          "lineage": [
+            "https://openalex.org/I4210101819",
+            "https://openalex.org/I4387153288"
+          ]
+        }
+      ],
+      "countries": [
+        "KZ"
+      ],
+      "is_corresponding": false,
+      "raw_author_name": "Жигитова, С.З.",
+      "raw_affiliation_strings": [
+        "Таразский государственный университет имени М.Х. Дулати"
+      ],
+      "raw_orcid": null,
+      "affiliations": [
+        {
+          "raw_affiliation_string": "Таразский государственный университет имени М.Х. Дулати",
+          "institution_ids": [
+            "https://openalex.org/I4210101819"
+          ]
+        }
+      ]
+    }
+  ],
+  "abstract_inverted_index": {
+    "Наблюдаемое": [
+      0
+    ],
+    "в": [
+      1,
+      34,
+      41
+    ],
+    "настоящее": [
+      2
+    ],
+    "время": [
+      3
+    ],
+    "снижение": [
+      4
+    ],
+    "продуктивности": [
+      5
+    ],
+    "орошаемых": [
+      6,
+      20,
+      57
+    ],
+    "земель": [
+      7,
+      21
+    ],
+    "юга": [
+      8
+    ],
+    "Казахстана": [
+      9
+    ],
+    "связано": [
+      10
+    ],
+    "с": [
+      11
+    ],
+    "ухудшением": [
+      12
+    ],
+    "технического": [
+      13
+    ],
+    "состояния": [
+      14
+    ],
+    "инженерной": [
+      15
+    ],
+    "системы": [
+      16
+    ],
+    "(КПД": [
+      17
+    ],
+    "0,25–0,40),": [
+      18
+    ],
+    "засолением": [
+      19
+    ],
+    "на": [
+      22
+    ],
+    "площади": [
+      23
+    ],
+    "более": [
+      24
+    ],
+    "50%,": [
+      25
+    ],
+    "осолонцеванием": [
+      26
+    ],
+    "почв": [
+      27,
+      81
+    ],
+    "(до": [
+      28
+    ],
+    "30%),": [
+      29
+    ],
+    "низким": [
+      30
+    ],
+    "содержанием": [
+      31
+    ],
+    "питательных": [
+      32,
+      89
+    ],
+    "веществ": [
+      33
+    ],
+    "корнеобитаемом": [
+      35
+    ],
+    "слое": [
+      36
+    ],
+    "и": [
+      37,
+      64,
+      73,
+      88
+    ],
+    "нехваткой": [
+      38
+    ],
+    "оросительной": [
+      39,
+      72
+    ],
+    "воды": [
+      40
+    ],
+    "вегетационный": [
+      42
+    ],
+    "период": [
+      43
+    ],
+    "(в": [
+      44
+    ],
+    "пределах": [
+      45
+    ],
+    "30–50%).": [
+      46
+    ],
+    "Для": [
+      47
+    ],
+    "повышения": [
+      48,
+      79
+    ],
+    "природно-ресурсного": [
+      49
+    ],
+    "потенциала": [
+      50
+    ],
+    "предлагается": [
+      51
+    ],
+    "интегрированная": [
+      52
+    ],
+    "модель": [
+      53
+    ],
+    "управления": [
+      54,
+      61
+    ],
+    "эколого-мелиоративным": [
+      55
+    ],
+    "состоянием": [
+      56
+    ],
+    "земель,": [
+      58
+    ],
+    "включающая": [
+      59
+    ],
+    "технологию": [
+      60,
+      78
+    ],
+    "водно-воздушным,": [
+      62
+    ],
+    "солевым": [
+      63
+    ],
+    "питательным": [
+      65
+    ],
+    "режимами": [
+      66
+    ],
+    "почв,": [
+      67
+    ],
+    "мероприятия": [
+      68
+    ],
+    "по": [
+      69
+    ],
+    "повышению": [
+      70
+    ],
+    "качества": [
+      71
+    ],
+    "коллекторно-дренажной": [
+      74
+    ],
+    "воды,": [
+      75
+    ],
+    "а": [
+      76
+    ],
+    "также": [
+      77
+    ],
+    "плодородия": [
+      80
+    ],
+    "путем": [
+      82
+    ],
+    "внесения": [
+      83
+    ],
+    "аккордных": [
+      84
+    ],
+    "доз": [
+      85
+    ],
+    "органического": [
+      86
+    ],
+    "вещества": [
+      87
+    ],
+    "элементов.": [
+      90
+    ]
+  },
+  "updated_date": "2026-09-26T08:19:03.415552"
+}

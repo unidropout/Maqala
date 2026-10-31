@@ -3,7 +3,21 @@ name = "maqala-ingest"
 version = "0.1.0"
 description = "Коннекторы Maqala: загрузка метаданных открытых научных статей"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "requests>=2.32",
+    "psycopg[binary]>=3.2",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["ingest*"]
 
 [tool.ruff]
 line-length = 100
@@ -14,3 +28,4 @@ select = ["E", "F", "I", "B", "UP"]
 
 [tool.pytest.ini_options]
 testpaths = ["ingest"]
+pythonpath = ["."]
