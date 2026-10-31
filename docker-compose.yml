@@ -1,0 +1,25 @@
+name: maqala
+
+services:
+  db:
+    image: postgres:16
+    container_name: maqala-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-maqala}
+      POSTGRES_USER: ${POSTGRES_USER:-maqala}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Задай POSTGRES_PASSWORD в .env}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - maqala-db:/var/lib/postgresql/data
+      # *.sql из db/ выполняются один раз, при создании пустой базы
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  maqala-db:

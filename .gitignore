@@ -1,0 +1,32 @@
+# Секреты
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node.js / Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.vercel/
+
+# Данные и дампы
+*.dump
+*.sql.gz
+data/
+
+# Система и редакторы
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

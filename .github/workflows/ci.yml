@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  compose:
+    name: Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Проверить docker-compose.yml
+        run: cp .env.example .env && docker compose config --quiet
+
+  python:
+    name: Python (ingest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Установить инструменты
+        run: pip install ruff pytest
+      - name: Линтер
+        run: ruff check .
+      - name: Тесты
+        # pytest возвращает код 5, если тестов ещё нет; это не ошибка
+        run: pytest || [ $? -eq 5 ]
+
+  # Линтер и тесты сайта (ESLint, проверка типов) добавятся на этапе 2 вместе с web/.
