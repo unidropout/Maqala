@@ -9,6 +9,7 @@ from ingest.openalex.normalize import (
     abstract_from_inverted_index,
     clean_abstract,
     clean_text,
+    detect_language,
     normalize,
 )
 
@@ -129,3 +130,37 @@ def test_clean_abstract_strips_label():
     assert clean_abstract("Аннотация. Работа посвящена") == "Работа посвящена"
     assert clean_abstract("Abstracts of talks are listed") == "Abstracts of talks are listed"
     assert clean_abstract("Abstract") == "Abstract"
+
+
+@pytest.mark.parametrize(
+    ("title", "source_language", "expected"),
+    [
+        ("Қазақстандағы ғылыми мақалалар", "ru", "kk"),
+        ("Қазақ тілінің грамматикасы", None, "kk"),
+        ("Повышение устойчивости орошаемых земель", "kk", "ru"),
+        ("Повышение устойчивости орошаемых земель", None, "ru"),
+        ("Структура покрытий", "uk", "uk"),
+        ("An evolutionary method for quadrocopters", "kk", "en"),
+        ("Climate change in Central Asia", "en", "en"),
+        ("Klimawandel in Zentralasien", "de", "de"),
+        ("Untitled", None, None),
+        ("Розвиток освіти в Україні", "uk", "uk"),
+        ("Ғылым", "ru", "kk"),
+    ],
+)
+def test_detect_language(title, source_language, expected):
+    assert detect_language(title, None, source_language) == expected
+
+
+def test_detect_language_uses_abstract():
+    assert (
+        detect_language("COVID-19", "Мақалада пандемия кезіндегі жарақаттар қарастырылады", "en")
+        == "kk"
+    )
+
+
+def test_title_wins_over_multilingual_abstract():
+    # Казахстанские журналы дают аннотацию на трёх языках: язык статьи определяет название.
+    title = "Опыт развития сельской медицины в развитых странах: литературный обзор"
+    abstract = "Мақалада ауылдық медицинаның дамуы қарастырылады. В статье рассмотрен опыт."
+    assert detect_language(title, abstract, "kk") == "ru"

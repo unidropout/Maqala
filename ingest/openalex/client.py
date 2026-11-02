@@ -37,16 +37,28 @@ SELECT_FIELDS = [
 ]
 
 
-def build_filter(countries: list[str]) -> str:
-    """Открытый доступ, авторы из указанных стран, без отозванных статей и служебных страниц."""
-    return ",".join(
-        [
-            "is_oa:true",
-            "is_retracted:false",
-            "is_paratext:false",
-            "authorships.countries:" + "|".join(c.upper() for c in countries),
-        ]
-    )
+def build_filter(
+    countries: list[str] | None = None,
+    languages: list[str] | None = None,
+    journal_countries: list[str] | None = None,
+    year_from: int | None = None,
+    year_to: int | None = None,
+) -> str:
+    """Открытый доступ без отозванных статей и служебных страниц плюс выбранные условия.
+
+    Значения внутри одного условия объединяются через «или», сами условия — через «и».
+    """
+    parts = ["is_oa:true", "is_retracted:false", "is_paratext:false"]
+    if countries:
+        parts.append("authorships.countries:" + "|".join(c.upper() for c in countries))
+    if languages:
+        parts.append("language:" + "|".join(lang.lower() for lang in languages))
+    if journal_countries:
+        codes = "|".join(c.upper() for c in journal_countries)
+        parts.append("primary_location.source.country_code:" + codes)
+    if year_from or year_to:
+        parts.append(f"publication_year:{year_from or ''}-{year_to or ''}")
+    return ",".join(parts)
 
 
 class OpenAlexClient:

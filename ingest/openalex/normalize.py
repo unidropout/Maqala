@@ -14,6 +14,14 @@ _ABSTRACT_LABEL_RE = re.compile(
     r"^(abstract|summary|аннотация|андатпа)\s*[:.\-—]?\s+", re.IGNORECASE
 )
 
+# Буквы, которые есть в казахском алфавите, но не в русском. «і» есть ещё в украинском и
+# белорусском, поэтому одна она не доказывает казахский язык.
+_KAZAKH_RE = re.compile(r"[әғқңөұүһіӘҒҚҢӨҰҮҺІ]")
+_KAZAKH_ONLY_RE = re.compile(r"[әғқңөұүһӘҒҚҢӨҰҮҺ]")
+_CYRILLIC_RE = re.compile(r"[а-яёА-ЯЁ]")
+_LATIN_RE = re.compile(r"[a-zA-Z]")
+_MIN_TITLE_LETTERS = 15
+
 # Поля, которые не кладём в raw: аннотация уже лежит текстом, а индекс занимает больше всего места.
 _RAW_EXCLUDE = {"abstract_inverted_index"}
 
@@ -29,18 +37,17 @@ def normalize(record: dict[str, Any]) -> dict[str, Any] | None:
     open_access = record.get("open_access") or {}
     topic = record.get("primary_topic") or {}
     doi = strip_prefix(record.get("doi"), "https://doi.org/")
+    abstract = clean_abstract(abstract_from_inverted_index(record.get("abstract_inverted_index")))
 
     return {
         "source": SOURCE,
         "source_id": strip_prefix(record["id"], "https://openalex.org/"),
         "doi": doi.lower() if doi else None,
         "title": title,
-        "abstract": clean_abstract(
-            abstract_from_inverted_index(record.get("abstract_inverted_index"))
-        ),
+        "abstract": abstract,
         "publication_year": record.get("publication_year"),
         "publication_date": parse_date(record.get("publication_date")),
-        "language": record.get("language") or None,
+        "language": detect_language(title, abstract, record.get("language")),
         "work_type": record.get("type") or None,
         "license": best_oa.get("license") or primary.get("license") or None,
         "is_oa": bool(open_access.get("is_oa")),
@@ -100,6 +107,31 @@ def authors(authorships: list[dict[str, Any]]) -> list[dict[str, Any]]:
             }
         )
     return result
+
+
+def detect_language(title: str, abstract: str | None, source_language: str | None) -> str | None:
+    """Уточняет язык по тексту: метка OpenAlex часто путает казахский, русский и английский.
+
+    Казахские буквы (ә, ғ, қ, ...) надёжно отличают казахский от русского. Для остальных языков
+    оставляем метку источника, кроме случая, когда «ru» или «kk» стоит у текста на латинице.
+
+    Решает название: казахстанские журналы часто дают аннотацию сразу на трёх языках.
+    Аннотация используется, только если в названии слишком мало букв (формулы, сокращения).
+    """
+    letters = len(_CYRILLIC_RE.findall(title)) + len(_LATIN_RE.findall(title))
+    letters += len(_KAZAKH_RE.findall(title))
+    text = title if letters >= _MIN_TITLE_LETTERS else f"{title} {abstract or ''}"
+    if _KAZAKH_ONLY_RE.search(text):
+        return "kk"
+    if _KAZAKH_RE.search(text) and source_language not in ("uk", "be"):
+        return "kk"
+    cyrillic = len(_CYRILLIC_RE.findall(text))
+    latin = len(_LATIN_RE.findall(text))
+    if cyrillic > latin:
+        return source_language if source_language not in (None, "en", "kk") else "ru"
+    if source_language in ("ru", "kk"):
+        return "en"
+    return source_language or None
 
 
 def clean_abstract(value: str | None) -> str | None:

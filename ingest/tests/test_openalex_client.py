@@ -22,8 +22,13 @@ def page(n, start=0, next_cursor=None):
 
 
 def test_build_filter():
-    assert build_filter(["kz", "UZ"]) == (
-        "is_oa:true,is_retracted:false,is_paratext:false,authorships.countries:KZ|UZ"
+    base = "is_oa:true,is_retracted:false,is_paratext:false"
+    assert build_filter(["kz", "UZ"]) == f"{base},authorships.countries:KZ|UZ"
+    assert build_filter(languages=["KK"], year_from=2020) == (
+        f"{base},language:kk,publication_year:2020-"
+    )
+    assert build_filter(journal_countries=["kz"], year_from=2015, year_to=2019) == (
+        f"{base},primary_location.source.country_code:KZ,publication_year:2015-2019"
     )
 
 

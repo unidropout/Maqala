@@ -63,8 +63,8 @@ def test_rerun_updates_without_duplicates(conn, monkeypatch):
     def client():
         return FakeClient([{"meta": {}, "results": p} for p in pages] + [{"results": []}])
 
-    first = run(conn, client(), ["KZ"], limit=None)
-    second = run(conn, client(), ["KZ"], limit=None)
+    first = run(conn, client(), {"countries": ["KZ"]}, limit=None)
+    second = run(conn, client(), {"countries": ["KZ"]}, limit=None)
 
     assert (first["fetched"], first["inserted"], first["updated"], first["skipped"]) == (4, 2, 0, 2)
     assert (second["inserted"], second["updated"], second["skipped"]) == (0, 2, 2)
