@@ -52,12 +52,13 @@ def normalize(record: dict[str, Any]) -> dict[str, Any] | None:
         "license": best_oa.get("license") or primary.get("license") or None,
         "is_oa": bool(open_access.get("is_oa")),
         "oa_status": open_access.get("oa_status") or None,
-        "landing_url": primary.get("landing_page_url") or record.get("doi") or record["id"],
+        "landing_url": http_url(primary.get("landing_page_url"))
+        or http_url(record.get("doi"))
+        or record["id"],
         # Страница бесплатной версии надёжнее pdf_url: тот иногда указывает на картинку.
-        "oa_url": best_oa.get("landing_page_url")
-        or best_oa.get("pdf_url")
-        or open_access.get("oa_url")
-        or None,
+        "oa_url": http_url(best_oa.get("landing_page_url"))
+        or http_url(best_oa.get("pdf_url"))
+        or http_url(open_access.get("oa_url")),
         "journal": (primary.get("source") or {}).get("display_name"),
         "field": (topic.get("field") or {}).get("display_name"),
         "subfield": (topic.get("subfield") or {}).get("display_name"),
@@ -147,6 +148,13 @@ def clean_text(value: str | None) -> str | None:
         return None
     text = _SPACE_RE.sub(" ", html.unescape(_TAG_RE.sub("", value))).strip()
     return text or None
+
+
+def http_url(value: str | None) -> str | None:
+    """Только http(s)-ссылки: метаданные в OpenAlex присылают издатели, там бывает что угодно."""
+    if value and value.lower().startswith(("http://", "https://")):
+        return value
+    return None
 
 
 def strip_prefix(value: str | None, prefix: str) -> str | None:

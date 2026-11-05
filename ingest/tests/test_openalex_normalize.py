@@ -164,3 +164,14 @@ def test_title_wins_over_multilingual_abstract():
     title = "Опыт развития сельской медицины в развитых странах: литературный обзор"
     abstract = "Мақалада ауылдық медицинаның дамуы қарастырылады. В статье рассмотрен опыт."
     assert detect_language(title, abstract, "kk") == "ru"
+
+
+def test_non_http_links_are_dropped(work_en):
+    work_en["primary_location"]["landing_page_url"] = "javascript:alert(1)"
+    work_en["best_oa_location"]["landing_page_url"] = "data:text/html,<script>alert(1)</script>"
+    work_en["best_oa_location"]["pdf_url"] = None
+    work_en["open_access"]["oa_url"] = None
+    work = normalize(work_en)
+
+    assert work["landing_url"] == "https://doi.org/10.3389/fbioe.2024.1444986"
+    assert work["oa_url"] is None

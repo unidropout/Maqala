@@ -1,0 +1,4 @@
+# Одинаковые окончания строк (LF) в репозитории на любой ОС.
+* text=auto eol=lf
+*.png binary
+*.webp binary

@@ -28,6 +28,7 @@ export type WorkCard = {
   title: string;
   abstract: string | null;
   publication_year: number | null;
+  language: string | null;
   journal: string | null;
   license: string | null;
   countries: string[];
@@ -41,7 +42,6 @@ export type Work = WorkCard & {
   source: string;
   source_id: string;
   publication_date: string | null;
-  language: string | null;
   work_type: string | null;
   oa_status: string | null;
   landing_url: string | null;
@@ -126,7 +126,7 @@ function buildWhere(f: Filters, exclude?: Facet) {
 }
 
 const CARD_COLUMNS = `
-  id, title, abstract, publication_year, journal, license, countries, cited_by_count,
+  id, title, abstract, publication_year, language, journal, license, countries, cited_by_count,
   (select coalesce(jsonb_agg(a), '[]') from (select a from jsonb_array_elements(authors) a limit 5) s) as authors,
   jsonb_array_length(authors) as authors_total
 `;
@@ -191,10 +191,11 @@ export async function getWork(id: number): Promise<Work | null> {
 }
 
 export async function getStats() {
-  const { rows } = await pool.query<{ total: number; kz: number; oa: number }>(
+  const { rows } = await pool.query<{ total: number; kz: number; kk: number; ru: number }>(
     `select count(*)::int as total,
             count(*) filter (where 'KZ' = any(countries))::int as kz,
-            count(*) filter (where is_oa)::int as oa
+            count(*) filter (where language = 'kk')::int as kk,
+            count(*) filter (where language = 'ru')::int as ru
      from works`,
   );
   return rows[0];

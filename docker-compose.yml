@@ -10,7 +10,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-maqala}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Задай POSTGRES_PASSWORD в .env}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      # Только с этого компьютера: без 127.0.0.1 база доступна всем в той же сети (Wi-Fi и т.п.).
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - maqala-db:/var/lib/postgresql/data
       # *.sql из db/ выполняются один раз, при создании пустой базы

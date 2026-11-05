@@ -1,25 +1,40 @@
-import { ru } from "@/lib/i18n";
+import { getDict, href, type Lang } from "@/lib/i18n";
 
-export function SearchBox({ defaultValue = "", large = false }: { defaultValue?: string; large?: boolean }) {
+export function SearchBox({
+  lang,
+  defaultValue = "",
+  large = false,
+}: {
+  lang: Lang;
+  defaultValue?: string;
+  large?: boolean;
+}) {
+  const t = getDict(lang).search;
   return (
-    <form action="/search" method="get" role="search" className="flex w-full gap-2">
+    <form
+      action={href(lang, "/search")}
+      method="get"
+      role="search"
+      className={`flex w-full items-center gap-2 rounded-full border border-line/40 bg-surface p-1.5 transition focus-within:border-ink ${large ? "sm:p-2" : ""}`}
+    >
       <label htmlFor="q" className="sr-only">
-        {ru.search.placeholder}
+        {t.placeholder}
       </label>
+      <svg aria-hidden viewBox="0 0 24 24" className="ml-3 h-5 w-5 shrink-0 text-muted" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" strokeLinecap="round" />
+      </svg>
       <input
         id="q"
         name="q"
         type="search"
         defaultValue={defaultValue}
-        placeholder={ru.search.placeholder}
+        placeholder={t.placeholder}
         autoComplete="off"
-        className={`min-w-0 flex-1 rounded-full border border-line bg-surface px-5 text-fg placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 ${large ? "h-14 text-lg" : "h-11"}`}
+        className={`min-w-0 flex-1 bg-transparent text-fg placeholder:text-muted focus:outline-none ${large ? "h-12 text-lg" : "h-10"}`}
       />
-      <button
-        type="submit"
-        className={`shrink-0 rounded-full bg-accent font-medium text-white transition hover:bg-accent/90 ${large ? "h-14 px-5 text-lg sm:px-7" : "h-11 px-4 sm:px-5"}`}
-      >
-        {ru.search.button}
+      <button type="submit" className={`btn shrink-0 ${large ? "h-12 px-5 sm:px-8" : "h-10 px-4 sm:px-5"}`}>
+        {t.button}
       </button>
     </form>
   );

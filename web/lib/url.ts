@@ -1,3 +1,4 @@
+import { href, type Lang } from "./i18n";
 import type { Filters } from "./works";
 
 /** Параметры URL для фильтров; пустые значения не попадают в адрес. */
@@ -16,10 +17,10 @@ export function filtersToParams(f: Filters): URLSearchParams {
 }
 
 /** Ссылка на выдачу с изменёнными фильтрами. При смене фильтров страница сбрасывается на первую. */
-export function searchHref(f: Filters, changes: Partial<Filters>): string {
+export function searchHref(lang: Lang, f: Filters, changes: Partial<Filters>): string {
   const next = { ...f, page: 1, ...changes };
   const query = filtersToParams(next).toString();
-  return query ? `/search?${query}` : "/search";
+  return href(lang, query ? `/search?${query}` : "/search");
 }
 
 export function toggle(list: string[], value: string): string[] {

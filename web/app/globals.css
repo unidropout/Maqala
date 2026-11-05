@@ -2,37 +2,101 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Токены темы. Пока черновые: полноценная дизайн-система — на этапе 4. */
+/*
+ * Токены темы (docs/design.md). Пудровый фон, графитовые текст и рамки, без ярких акцентов:
+ * выразительность дают крупные узкие заголовки, точки-маркеры и растровые стикеры.
+ */
 :root {
-  --bg: 250 248 243;
-  --surface: 255 255 255;
-  --fg: 24 24 27;
-  --muted: 92 92 102;
-  --line: 226 222 212;
-  --accent: 0 120 150;
-  --gold: 214 158 0;
+  --bg: 253 244 242;
+  --surface: 255 250 249;
+  --fg: 30 30 30;
+  --ink: 74 74 74;
+  --muted: 98 92 90;
+  --line: 74 74 74;
+  --soft: 246 230 226;
   color-scheme: light;
 }
 
+/*
+ * Тёмная тема: тёплый почти чёрный фон, а заголовки, логотип и кнопки — пудрово-розовые,
+ * в цвет фона светлой темы. Включается по системной настройке или переключателем в шапке,
+ * который ставит на <html> атрибут data-theme.
+ */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: 15 17 20;
-    --surface: 24 27 32;
-    --fg: 236 236 238;
-    --muted: 160 163 172;
-    --line: 45 49 56;
-    --accent: 64 196 222;
-    --gold: 250 196 50;
+  :root:not([data-theme="light"]) {
+    --bg: 26 24 24;
+    --surface: 36 32 32;
+    --fg: 247 233 229;
+    --ink: 244 214 206;
+    --muted: 186 168 163;
+    --line: 244 214 206;
+    --soft: 54 46 45;
     color-scheme: dark;
   }
 }
 
-body {
-  @apply bg-bg text-fg antialiased;
+:root[data-theme="dark"] {
+  --bg: 26 24 24;
+  --surface: 36 32 32;
+  --fg: 247 233 229;
+  --ink: 244 214 206;
+  --muted: 186 168 163;
+  --line: 244 214 206;
+  --soft: 54 46 45;
+  color-scheme: dark;
 }
 
-:focus-visible {
-  @apply outline-2 outline-offset-2 outline-accent;
+@layer base {
+  body {
+    @apply bg-bg text-fg antialiased;
+  }
+
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-ink;
+  }
+}
+
+@layer components {
+  /* Крупный узкий заголовок капсом. */
+  .display {
+    @apply font-display font-semibold uppercase leading-[0.92] tracking-tight text-ink;
+  }
+
+  /* Контейнер для заголовков с размером по ширине колонки (lib/fit.ts). */
+  .fit {
+    container-type: inline-size;
+  }
+
+  /* Мелкая подпись капсом, как «WEST HIGH SCHOOL» в референсе. */
+  .label {
+    @apply text-xs font-medium uppercase tracking-[0.08em] text-muted;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 font-medium text-bg transition hover:bg-ink/85;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-line/50 px-6 py-3 font-medium text-ink transition hover:border-ink hover:bg-surface;
+  }
+
+  .card {
+    @apply rounded-3xl border border-line/30 bg-surface;
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded-full border border-line/30 px-2.5 py-0.5 text-xs text-muted;
+  }
+
+  /* Точка-маркер из референса. */
+  .dot {
+    @apply inline-block h-3 w-3 shrink-0 rounded-full bg-ink;
+  }
+
+  /* Растровый стикер: картинка с белой обводкой уже нарисована, добавляем лёгкую тень. */
+  .sticker {
+    @apply pointer-events-none select-none drop-shadow-[0_6px_14px_rgba(60,40,40,0.12)];
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
