@@ -24,6 +24,19 @@ npm run dev
 | `/countries/{code}` | страница страны, например `/countries/kz` |
 | `/about` | о проекте |
 
+## Аккаунты и админка
+
+- `/{язык}/register`, `/{язык}/login`, `/{язык}/profile` — регистрация, вход, профиль с избранным.
+- `/{язык}/admin` — админка (роли `editor` и `superadmin`).
+
+Первый суперадмин: зарегистрируйтесь на сайте, затем в папке `web`:
+
+```bash
+npm run set-role -- you@example.com superadmin
+```
+
+Вход через Google: создайте OAuth client ID (тип Web application) в https://console.cloud.google.com/apis/credentials, добавьте адрес возврата `http://localhost:3000/api/auth/google/callback` и впишите `GOOGLE_CLIENT_ID` и `GOOGLE_CLIENT_SECRET` в `.env`.
+
 ## API
 
 | Метод | Путь | Что возвращает |

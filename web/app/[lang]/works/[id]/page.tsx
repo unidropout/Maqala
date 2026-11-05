@@ -5,7 +5,9 @@ import { LicenseBadge } from "@/components/WorkCard";
 import { countryName, formatDate, formatNumber, languageName, licenseName, safeUrl, truncate } from "@/lib/format";
 import { href } from "@/lib/i18n";
 import { alternates, pageLang } from "@/lib/i18n/server";
-import { getWork } from "@/lib/works";
+import { toggleFavorite } from "@/lib/auth/actions";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getWork, isFavorite } from "@/lib/works";
 
 type Props = { params: Promise<{ lang: string; id: string }> };
 
@@ -30,6 +32,8 @@ export default async function WorkPage({ params }: Props) {
   const work = await getWork(Number((await params).id));
   if (!work) notFound();
 
+  const user = await getCurrentUser();
+  const saved = user ? await isFavorite(user.id, work.id) : false;
   const source = SOURCE_NAMES[work.source];
   const landingUrl = safeUrl(work.landing_url);
   const oaUrl = safeUrl(work.oa_url);
@@ -89,6 +93,19 @@ export default async function WorkPage({ params }: Props) {
           >
             {t.work.freeVersion} ↗
           </a>
+        )}
+        {user ? (
+          <form action={toggleFavorite}>
+            <input type="hidden" name="lang" value={lang} />
+            <input type="hidden" name="work_id" value={work.id} />
+            <button type="submit" aria-pressed={saved} className={saved ? "btn" : "btn-outline"}>
+              {saved ? "★" : "☆"} {saved ? t.favorites.remove : t.favorites.add}
+            </button>
+          </form>
+        ) : (
+          <Link href={href(lang, "/login")} className="btn-outline">
+            ☆ {t.auth.loginToSave}
+          </Link>
         )}
       </div>
 

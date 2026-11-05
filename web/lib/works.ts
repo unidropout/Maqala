@@ -104,7 +104,8 @@ type Facet = keyof Facets;
 
 /** Условия WHERE для фильтров. Фасет, для которого считаются количества, можно исключить. */
 function buildWhere(f: Filters, exclude?: Facet) {
-  const where: string[] = [];
+  // Скрытые в админке статьи на сайте не показываются нигде.
+  const where: string[] = ["not is_hidden"];
   const params: unknown[] = [];
   const add = (sql: (n: string) => string, value: unknown) => {
     params.push(value);
@@ -122,7 +123,7 @@ function buildWhere(f: Filters, exclude?: Facet) {
     else add((n) => `license = ${n}`, f.license);
   }
 
-  return { sql: where.length ? `where ${where.join(" and ")}` : "", params };
+  return { sql: `where ${where.join(" and ")}`, params };
 }
 
 const CARD_COLUMNS = `
@@ -156,10 +157,10 @@ const FACET_SQL: Record<Facet, (where: string) => string> = {
     `select c as value, count(*)::int as count from works cross join unnest(countries) c ${w}
      group by c order by count desc, c limit 12`,
   field: (w) =>
-    `select field as value, count(*)::int as count from works ${w ? `${w} and` : "where"} field is not null
+    `select field as value, count(*)::int as count from works ${w} and field is not null
      group by field order by count desc, field limit 12`,
   language: (w) =>
-    `select language as value, count(*)::int as count from works ${w ? `${w} and` : "where"} language is not null
+    `select language as value, count(*)::int as count from works ${w} and language is not null
      group by language order by count desc, language limit 8`,
   license: (w) =>
     `select coalesce(license, 'none') as value, count(*)::int as count from works ${w}
@@ -178,14 +179,15 @@ export async function getFacets(f: Filters): Promise<Facets> {
   return Object.fromEntries(facets.map((facet, i) => [facet, results[i].rows])) as Facets;
 }
 
-export async function getWork(id: number): Promise<Work | null> {
+/** includeHidden — для админки: скрытая статья открывается только там. */
+export async function getWork(id: number, includeHidden = false): Promise<Work | null> {
   if (!Number.isSafeInteger(id) || id < 1) return null;
   const { rows } = await pool.query<Work>(
     `select id, title, abstract, publication_year, publication_date::text, journal, license, countries,
             cited_by_count, authors, jsonb_array_length(authors) as authors_total, doi, source, source_id,
             language, work_type, oa_status, landing_url, oa_url, field, subfield, topic
-     from works where id = $1`,
-    [id],
+     from works where id = $1 and ($2 or not is_hidden)`,
+    [id, includeHidden],
   );
   return rows[0] ?? null;
 }
@@ -196,14 +198,14 @@ export async function getStats() {
             count(*) filter (where 'KZ' = any(countries))::int as kz,
             count(*) filter (where language = 'kk')::int as kk,
             count(*) filter (where language = 'ru')::int as ru
-     from works`,
+     from works where not is_hidden`,
   );
   return rows[0];
 }
 
 export async function getTopCited(limit: number, country?: string): Promise<WorkCard[]> {
   const { rows } = await pool.query<WorkCard>(
-    `select ${CARD_COLUMNS} from works ${country ? "where countries @> array[$2]::text[]" : ""}
+    `select ${CARD_COLUMNS} from works where not is_hidden ${country ? "and countries @> array[$2]::text[]" : ""}
      order by cited_by_count desc, id limit $1`,
     country ? [limit, country] : [limit],
   );
@@ -212,21 +214,21 @@ export async function getTopCited(limit: number, country?: string): Promise<Work
 
 export async function getCountryStats(code: string) {
   const [total, byYear, byField, recent, top] = await Promise.all([
-    pool.query<{ total: number }>(`select count(*)::int as total from works where countries @> array[$1]::text[]`, [code]),
+    pool.query<{ total: number }>(`select count(*)::int as total from works where not is_hidden and countries @> array[$1]::text[]`, [code]),
     pool.query<{ year: number; count: number }>(
       `select publication_year as year, count(*)::int as count from works
-       where countries @> array[$1]::text[] and publication_year is not null
+       where not is_hidden and countries @> array[$1]::text[] and publication_year is not null
        group by 1 order by 1`,
       [code],
     ),
     pool.query<FacetValue>(
       `select field as value, count(*)::int as count from works
-       where countries @> array[$1]::text[] and field is not null
+       where not is_hidden and countries @> array[$1]::text[] and field is not null
        group by 1 order by 2 desc limit 10`,
       [code],
     ),
     pool.query<WorkCard>(
-      `select ${CARD_COLUMNS} from works where countries @> array[$1]::text[]
+      `select ${CARD_COLUMNS} from works where not is_hidden and countries @> array[$1]::text[]
        order by publication_date desc nulls last, id limit 5`,
       [code],
     ),
@@ -239,4 +241,20 @@ export async function getCountryStats(code: string) {
     recent: recent.rows,
     topCited: top,
   };
+}
+
+export async function getFavorites(userId: number): Promise<WorkCard[]> {
+  const { rows } = await pool.query<WorkCard>(
+    `select ${CARD_COLUMNS} from works
+     where not is_hidden and id in (select work_id from favorites where user_id = $1)
+     order by (select created_at from favorites f where f.user_id = $1 and f.work_id = works.id) desc
+     limit 200`,
+    [userId],
+  );
+  return rows;
+}
+
+export async function isFavorite(userId: number, workId: number): Promise<boolean> {
+  const { rowCount } = await pool.query("select 1 from favorites where user_id = $1 and work_id = $2", [userId, workId]);
+  return Boolean(rowCount);
 }

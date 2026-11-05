@@ -77,3 +77,71 @@ create table if not exists ingest_runs (
     errors        integer     not null default 0,  -- записи, которые не удалось обработать
     error_message text
 );
+
+-- Модерация статей (админка). Скрытая статья не видна на сайте; исправленную вручную
+-- (edited_at не пусто) коннектор больше не перезаписывает.
+alter table works add column if not exists is_hidden boolean not null default false;
+alter table works add column if not exists hidden_reason text;
+alter table works add column if not exists edited_at timestamptz;
+
+-- Пользователи. Роли: user — обычный, editor — правит статьи, superadmin — всё, включая
+-- пользователей и загрузки. Первого superadmin назначают командой npm run set-role.
+create table if not exists users (
+    id             bigint generated always as identity primary key,
+    email          text        not null,
+    email_verified boolean     not null default false,  -- подтверждена Google
+    name           text        not null,
+    password_hash  text,                                 -- пусто, если вход только через Google
+    google_sub     text unique,
+    role           text        not null default 'user'
+                   check (role in ('user', 'editor', 'superadmin')),
+    lang           text        not null default 'ru' check (lang in ('ru', 'kk', 'en')),
+    theme          text        not null default 'system' check (theme in ('system', 'light', 'dark')),
+    is_blocked     boolean     not null default false,
+    created_at     timestamptz not null default now(),
+    updated_at     timestamptz not null default now(),
+    last_login_at  timestamptz
+);
+create unique index if not exists users_email_uq on users (lower(email));
+
+-- Сессии: в cookie лежит случайный токен, здесь — только его SHA-256.
+create table if not exists sessions (
+    id         text        primary key,
+    user_id    bigint      not null references users (id) on delete cascade,
+    created_at timestamptz not null default now(),
+    expires_at timestamptz not null
+);
+create index if not exists sessions_user_idx on sessions (user_id);
+
+create table if not exists favorites (
+    user_id    bigint      not null references users (id) on delete cascade,
+    work_id    bigint      not null references works (id) on delete cascade,
+    created_at timestamptz not null default now(),
+    primary key (user_id, work_id)
+);
+
+-- Журнал действий в админке: кто, что и когда изменил.
+create table if not exists audit_log (
+    id          bigint generated always as identity primary key,
+    actor_id    bigint      references users (id) on delete set null,
+    action      text        not null,
+    target_type text        not null,
+    target_id   text,
+    details     jsonb       not null default '{}',
+    created_at  timestamptz not null default now()
+);
+create index if not exists audit_log_created_idx on audit_log (created_at desc);
+
+-- Очередь загрузок, которые запросили из админки. Выполняет python -m ingest.worker.
+create table if not exists ingest_jobs (
+    id           bigint generated always as identity primary key,
+    params       jsonb       not null,
+    status       text        not null default 'queued'
+                 check (status in ('queued', 'running', 'done', 'failed')),
+    requested_by bigint      references users (id) on delete set null,
+    run_id       bigint      references ingest_runs (id) on delete set null,
+    error        text,
+    created_at   timestamptz not null default now(),
+    started_at   timestamptz,
+    finished_at  timestamptz
+);

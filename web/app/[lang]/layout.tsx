@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Oswald } from "next/font/google";
 import { Footer, Header } from "@/components/Header";
+import { getCurrentUser } from "@/lib/auth/session";
 import { LANGS } from "@/lib/i18n";
 import { alternates, pageLang, type LangParams } from "@/lib/i18n/server";
 import { THEME_KEY } from "@/lib/theme";
@@ -32,8 +33,11 @@ export async function generateMetadata({ params }: LangParams): Promise<Metadata
 
 export default async function RootLayout({ children, params }: LangParams & { children: React.ReactNode }) {
   const { lang, t } = await pageLang(params);
+  // Тема из профиля; выбор переключателем в этом браузере (localStorage) всё равно главнее.
+  const user = await getCurrentUser();
+  const theme = user && user.theme !== "system" ? user.theme : undefined;
   return (
-    <html lang={lang} className={`${sans.variable} ${display.variable}`} suppressHydrationWarning>
+    <html lang={lang} data-theme={theme} className={`${sans.variable} ${display.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

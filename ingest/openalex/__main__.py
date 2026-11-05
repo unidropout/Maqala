@@ -11,6 +11,7 @@ import logging
 import os
 import sys
 from collections import Counter
+from collections.abc import Callable
 
 from dotenv import load_dotenv
 
@@ -21,10 +22,21 @@ from ingest.openalex.normalize import SOURCE, normalize
 log = logging.getLogger("ingest.openalex")
 
 
-def run(conn, client: OpenAlexClient, selection: dict, limit: int | None) -> Counter:
-    """selection — аргументы build_filter: countries, languages, journal_countries, годы."""
+def run(
+    conn,
+    client: OpenAlexClient,
+    selection: dict,
+    limit: int | None,
+    on_start: Callable[[int], None] | None = None,
+) -> Counter:
+    """selection — аргументы build_filter: countries, languages, journal_countries, годы.
+
+    on_start получает id записи в ingest_runs сразу после её создания.
+    """
     filter_ = build_filter(**selection)
     run_id = db.start_run(conn, SOURCE, {**selection, "limit": limit, "filter": filter_})
+    if on_start:
+        on_start(run_id)
     stats = Counter(fetched=0, inserted=0, updated=0, skipped=0, errors=0)
     try:
         for page in client.iter_pages(filter_, limit=limit):
@@ -44,7 +56,8 @@ def run(conn, client: OpenAlexClient, selection: dict, limit: int | None) -> Cou
                         stats["errors"] += 1
                         log.exception("Не удалось сохранить %s", record.get("id"))
                         continue
-                    stats["skipped" if result is db.UpsertResult.DUPLICATE else result.value] += 1
+                    skipped = result in (db.UpsertResult.DUPLICATE, db.UpsertResult.PROTECTED)
+                    stats["skipped" if skipped else result.value] += 1
             log.info("Обработано %d записей", stats["fetched"])
     except Exception as exc:
         conn.rollback()

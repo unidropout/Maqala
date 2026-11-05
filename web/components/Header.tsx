@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { getCurrentUser, hasRole } from "@/lib/auth/session";
 import { getDict, href, type Lang } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 
@@ -25,9 +26,10 @@ function navItems(lang: Lang) {
   ];
 }
 
-export function Header({ lang }: { lang: Lang }) {
+export async function Header({ lang }: { lang: Lang }) {
   const t = getDict(lang);
   const items = navItems(lang);
+  const user = await getCurrentUser();
   return (
     <header className="sticky top-0 z-10 bg-bg/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
@@ -51,6 +53,25 @@ export function Header({ lang }: { lang: Lang }) {
             <LangSwitcher lang={lang} label={t.nav.language} />
           </Suspense>
           <ThemeToggle toLight={t.theme.toLight} toDark={t.theme.toDark} />
+          {hasRole(user, "editor") && (
+            <Link href={href(lang, "/admin")} className="hidden rounded-full px-3 py-2 text-sm font-medium text-ink transition hover:bg-soft md:block">
+              {t.auth.admin}
+            </Link>
+          )}
+          {user ? (
+            <Link
+              href={href(lang, "/profile")}
+              aria-label={`${t.auth.profile}: ${user.name}`}
+              title={user.name}
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ink text-sm font-semibold uppercase text-bg"
+            >
+              {user.name.charAt(0)}
+            </Link>
+          ) : (
+            <Link href={href(lang, "/login")} className="btn shrink-0 px-4 py-2 text-sm">
+              {t.auth.login}
+            </Link>
+          )}
         </div>
       </div>
     </header>

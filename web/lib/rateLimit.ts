@@ -10,7 +10,7 @@ type Bucket = { count: number; resetAt: number };
 const buckets = new Map<string, Bucket>();
 const MAX_KEYS = 10_000;
 
-export function rateLimit(key: string, limit: number, windowMs: number, now = Date.now()) {
+function bucketFor(key: string, windowMs: number, now: number): Bucket {
   let bucket = buckets.get(key);
   if (!bucket || bucket.resetAt <= now) {
     if (buckets.size >= MAX_KEYS) {
@@ -19,11 +19,28 @@ export function rateLimit(key: string, limit: number, windowMs: number, now = Da
     bucket = { count: 0, resetAt: now + windowMs };
     buckets.set(key, bucket);
   }
+  return bucket;
+}
+
+/** Засчитывает запрос и сообщает, укладывается ли он в лимит. */
+export function rateLimit(key: string, limit: number, windowMs: number, now = Date.now()) {
+  const bucket = bucketFor(key, windowMs, now);
   bucket.count += 1;
   return {
     allowed: bucket.count <= limit,
     retryAfter: Math.ceil((bucket.resetAt - now) / 1000),
   };
+}
+
+/** Превышен ли лимит, без учёта текущего запроса (для счётчиков неудачных попыток). */
+export function isLimited(key: string, limit: number, now = Date.now()): boolean {
+  const bucket = buckets.get(key);
+  return !!bucket && bucket.resetAt > now && bucket.count >= limit;
+}
+
+/** Засчитывает событие (например, неверный пароль) без проверки лимита. */
+export function hit(key: string, windowMs: number, now = Date.now()): void {
+  bucketFor(key, windowMs, now).count += 1;
 }
 
 /** IP клиента. За Vercel и другими прокси он в первом значении X-Forwarded-For. */

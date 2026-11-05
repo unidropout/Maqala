@@ -39,6 +39,8 @@ values ({", ".join(f"%({c})s" for c in WORK_COLUMNS)})
 on conflict (source, source_id) do update set
     {", ".join(f"{c} = excluded.{c}" for c in WORK_COLUMNS[2:])},
     updated_at = now()
+-- Статью, исправленную в админке, источник больше не перезаписывает.
+where works.edited_at is null
 returning (xmax = 0) as inserted
 """
 
@@ -54,6 +56,7 @@ class UpsertResult(Enum):
     INSERTED = "inserted"
     UPDATED = "updated"
     DUPLICATE = "duplicate"
+    PROTECTED = "protected"  # исправлена вручную в админке
 
 
 def connect(database_url: str) -> psycopg.Connection:
@@ -68,8 +71,10 @@ def upsert_work(conn: psycopg.Connection, work: dict[str, Any]) -> UpsertResult:
                 return UpsertResult.DUPLICATE
         params = {c: Jsonb(work[c]) if c in _JSON_COLUMNS else work[c] for c in WORK_COLUMNS}
         cur.execute(_UPSERT_SQL, params)
-        (inserted,) = cur.fetchone()
-    return UpsertResult.INSERTED if inserted else UpsertResult.UPDATED
+        row = cur.fetchone()
+    if row is None:
+        return UpsertResult.PROTECTED
+    return UpsertResult.INSERTED if row[0] else UpsertResult.UPDATED
 
 
 def start_run(conn: psycopg.Connection, source: str, params: dict[str, Any]) -> int:

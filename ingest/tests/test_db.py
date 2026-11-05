@@ -9,6 +9,7 @@ from pathlib import Path
 
 import psycopg
 import pytest
+from psycopg.types.json import Jsonb
 
 from ingest import db
 from ingest.openalex.__main__ import run
@@ -36,6 +37,7 @@ def conn():
         conn.commit()
         yield conn
         conn.rollback()
+        conn.execute("delete from ingest_jobs where params->>'test' = 'true'")
         conn.execute("delete from works where source_id like 'WTEST%'")
         conn.execute("delete from ingest_runs where params->>'test' = 'true'")
         conn.commit()
@@ -89,3 +91,42 @@ def test_upsert_stores_arrays_and_json(conn):
     assert countries == ["KZ"]
     assert authors[0]["institutions"][0]["country"] == "KZ"
     assert raw["id"] == "https://openalex.org/WTEST10"
+
+
+def test_manually_edited_work_is_not_overwritten(conn):
+    from ingest.openalex.normalize import normalize
+
+    work = normalize(record("WTEST20", "10.0000/test.20", title="Из источника"))
+    assert db.upsert_work(conn, work) is db.UpsertResult.INSERTED
+    conn.execute(
+        "update works set title = 'Исправлено вручную', edited_at = now() "
+        "where source_id = 'WTEST20'"
+    )
+    assert db.upsert_work(conn, work) is db.UpsertResult.PROTECTED
+    title = conn.execute("select title from works where source_id = 'WTEST20'").fetchone()[0]
+    assert title == "Исправлено вручную"
+
+
+def test_worker_runs_queued_job(conn, monkeypatch):
+    from ingest import worker
+
+    original_start = db.start_run
+    monkeypatch.setattr(
+        db, "start_run", lambda c, s, p: original_start(c, s, {**p, "test": "true"})
+    )
+    job_id = conn.execute(
+        "insert into ingest_jobs (params) values (%s) returning id",
+        (Jsonb({"languages": ["kk"], "limit": 5, "test": "true"}),),
+    ).fetchone()[0]
+    conn.commit()
+    client = FakeClient(
+        [{"meta": {}, "results": [record("WTEST30", "10.0000/test.30")]}, {"results": []}]
+    )
+
+    assert worker.process_next(conn, client) is True
+    status, run_id, result = conn.execute(
+        "select status, run_id, params->'result' from ingest_jobs where id = %s", (job_id,)
+    ).fetchone()
+    assert status == "done"
+    assert run_id is not None
+    assert result["inserted"] == 1
